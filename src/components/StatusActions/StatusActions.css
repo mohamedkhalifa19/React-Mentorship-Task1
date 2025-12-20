@@ -1,0 +1,14 @@
+.status-box:has(input:checked) {
+  background: #fff;
+  color: blue;
+}
+.status-box {
+  padding: 0.2rem 0.8rem;
+  text-transform: capitalize;
+}
+.status-box > * {
+  cursor: pointer;
+}
+.status-action-container {
+  padding: 0.2rem;
+}

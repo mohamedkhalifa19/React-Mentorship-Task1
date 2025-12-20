@@ -1,0 +1,14 @@
+.initial-status-box:has(input:checked) {
+  background: blue;
+  color: white;
+}
+.initial-status-box {
+  margin-top: 1rem;
+  padding: 0.5rem 0.8rem;
+  text-align: center;
+  text-transform: capitalize;
+  border: 1px solid #ddd;
+}
+.initial-status-box > * {
+  cursor: pointer;
+}
