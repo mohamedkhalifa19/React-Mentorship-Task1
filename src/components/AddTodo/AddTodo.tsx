@@ -13,15 +13,19 @@ import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { Input } from "../ui/input";
 import { useState } from "react";
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { addNewTodo } from "@/app/features/Todos/todosSlice";
 interface IProps {
   isOpen: boolean;
   openModal: () => void;
   closeModal: () => void;
 }
-function AddTodo({ isOpen, closeModal, openModal }: IProps) {
+function AddTodo({ isOpen, closeModal }: IProps) {
   const [status, setStatus] = useState("pending");
   const [desc, setDesc] = useState("");
-  const [id, setID] = useState<string>("");
+  const [id, setID] = useState<number>(0);
+  const dispatch = useDispatch();
   return (
     <MyModal isOpen={isOpen} className="p-2">
       {" "}
@@ -68,7 +72,7 @@ function AddTodo({ isOpen, closeModal, openModal }: IProps) {
               <Input
                 type="text"
                 value={id}
-                onChange={(e) => setID(e.target.value)}
+                onChange={(e) => setID(Number(e.target.value))}
                 placeholder="User ID"
                 style={{ padding: "1.2rem" }}
               />
@@ -80,19 +84,20 @@ function AddTodo({ isOpen, closeModal, openModal }: IProps) {
                   <input
                     type="radio"
                     name="status"
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
+                    value={"pending"}
+                    onClick={() => setStatus("pending")}
                     className=" w-fit  hidden"
                     id="pending"
                   />
                   <label htmlFor={"pending"}>pending</label>
                 </div>
-                <div className="initial-status-box rounded-lg w-full">
+                <div
+                  className="initial-status-box rounded-lg w-full"
+                  onClick={() => setStatus("completed")}>
                   <Input
                     type="radio"
                     name="status"
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
+                    value={"completed"}
                     className=" w-fit  hidden"
                     id="completed"
                   />
@@ -112,14 +117,33 @@ function AddTodo({ isOpen, closeModal, openModal }: IProps) {
           </Button>
           <Button
             onClick={async () => {
-              const res = await fetch("https://dummyjson.com/todos/add", {
+              await fetch("https://dummyjson.com/todos/add", {
                 method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "application/json",
+                },
                 body: JSON.stringify({
-                  userId: id,
+                  userId: Number(id),
                   todo: desc,
-                  completed: status === "completed" ? true : false,
+                  completed: status === "completed",
                 }),
-              }).then((res) => console.log(res.json()));
+              }).then((res) => {
+                if (res.status === 201) {
+                  dispatch(
+                    addNewTodo({
+                      userId: id,
+                      completed: status === "completed",
+                      todo: desc,
+                    })
+                  );
+                  setDesc("");
+                  setID(0);
+                  setStatus("pending");
+                  closeModal();
+                  toast("Todo added Successfuly ✅");
+                }
+              });
             }}
             className="w-fit cursor-pointer rounded-3xl bg-violet-700"
             style={{ padding: "1rem 2rem" }}>

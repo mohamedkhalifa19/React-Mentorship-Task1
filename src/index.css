@@ -11,7 +11,10 @@ body {
   font-family: sans-serif;
   background: #f8fafd;
 }
-
+a[data-active="true"] {
+  background: rgb(38, 3, 83);
+  color: #fff;
+}
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

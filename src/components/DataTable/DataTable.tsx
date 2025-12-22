@@ -12,26 +12,48 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { useEffect } from "react";
-import { setTodos } from "@/App/features/Todos/todosSlice";
+import { useEffect, useState } from "react";
+import { setTodos, setTotal } from "@/app/features/Todos/todosSlice";
 import { useDispatch, useSelector } from "react-redux";
+import EditTodo from "../EditTodo/EditTodo";
+import type { Todo } from "@/Types/Types";
+import DelTodo from "../DelTodo/DelTodo";
+import SkeletonDemo from "../SkeletonDemo/SkeletonDemo";
 function DataTable() {
-  const todos = useSelector((state: any) => state.todos);
+  const { todos, limit, skip } = useSelector((state: any) => state.todos);
   const dispatch = useDispatch();
   useEffect(() => {
     const fetchData = async () => {
-      const data = await fetch("https://dummyjson.com/todos").then((res) =>
-        res.json()
-      );
+      const data = await fetch(
+        `https://dummyjson.com/todos?limit=${limit}&skip=${skip}`
+      ).then((res) => res.json());
+      console.log(data);
       dispatch(setTodos(data.todos));
+      dispatch(setTotal(data.total));
     };
     fetchData();
-  }, [dispatch]);
+  }, [dispatch, limit, skip]);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDelOpen, setIsDelOpen] = useState(false);
+  const [todo, setTodo] = useState<Todo>();
+  const openEditModal = () => setIsEditOpen(true);
+  const closeEditModal = () => setIsEditOpen(false);
+  const openDelModal = () => setIsDelOpen(true);
+  const closeDelModal = () => setIsDelOpen(false);
   const table = useReactTable({
-    columns,
+    columns: columns({
+      isEditOpen,
+      openEditModal,
+      closeEditModal,
+      setTodo,
+      openDelModal,
+      closeDelModal,
+      isDelOpen,
+    }),
     data: todos,
     getCoreRowModel: getCoreRowModel(),
   });
+  console.log(todos);
   return (
     <div
       className="w-[90%] border  border-[#ddd] m-auto rounded-2xl"
@@ -72,14 +94,35 @@ function DataTable() {
               </TableRow>
             ))
           ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
+            <>
+              {Array.from({ length: 5 }).map((_, idx) => {
+                return (
+                  <TableRow className="w-full" key={idx}>
+                    <TableCell
+                      colSpan={5}
+                      className="h-15 w-full  text-center  "
+                      style={{ padding: "0 1rem" }}>
+                      <SkeletonDemo />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </>
           )}
         </TableBody>
       </Table>
+      <EditTodo
+        isEditOpen={isEditOpen}
+        closeEditModal={closeEditModal}
+        openEditModal={openEditModal}
+        todo={todo}
+      />
+      <DelTodo
+        isDelOpen={isDelOpen}
+        closeDelModal={closeDelModal}
+        openEditModal={openDelModal}
+        todo={todo}
+      />
     </div>
   );
 }
