@@ -36,9 +36,6 @@ function EditTodo({ closeEditModal, isEditOpen, todo }: IProps) {
   const dispatch = useDispatch();
 
   const onSubmitHandler: SubmitHandler<IInputs> = async (data) => {
-    console.log(data);
-    console.log("Errors");
-    console.log(String(data.Status) === "completed");
     await fetch(`https://dummyjson.com/todos/${todo?.id}`, {
       method: "PUT",
       headers: {
